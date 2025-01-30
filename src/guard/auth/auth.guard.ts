@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { jwtConstants } from 'src/auth/constants';
 import * as jwt from 'jsonwebtoken';
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,7 +26,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('No token provided');
     }
     try {
-      const decoded = jwt.verify(token, jwtConstants.secret);
+      const decoded = jwt.verify(token, 'bo86v7i51frFFI&V6udnpso85t6mz92o&$6FFI&V63#&PGH&(brjtexr#*PCV&B');
       request['user'] = decoded; 
       return true;
     } catch (error) {
