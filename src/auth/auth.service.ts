@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, BadRequestException,UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, BadRequestException,UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { InjectRepository, } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -17,7 +17,8 @@ export class AuthService {
 
     async signup(signupDto: SignupDto): Promise<{ message: string }> {
         const { email, username, password, ...otherDetails } = signupDto;
-
+        
+        // console.log('signupDto', signupDto);
         const emailExists = await this.userRepository.findOne({ where: { email } });
         if (emailExists) {
             throw new ConflictException({
@@ -36,13 +37,14 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // console.log('otherDetails', otherDetails);
         const user = this.userRepository.create({
             ...otherDetails,
             email,
             username,
             password: hashedPassword,
         });
-
+        // console
         await this.userRepository.save(user);
 
         return { message: 'User Registered Successfully' };
@@ -54,7 +56,7 @@ export class AuthService {
 
         const userExists = await this.userRepository.findOne({ where: { email } });
         if (!userExists) {
-            throw new ConflictException({
+            throw new NotFoundException({
                 field: 'email',
                 message: 'User does not exists',
             });
@@ -62,7 +64,7 @@ export class AuthService {
 
         const valid = await bcrypt.compare(password, userExists.password);
         if (valid === false) {
-            throw new ConflictException({
+            throw new BadRequestException({
                 field: 'password',
                 message: 'Wrong Password',
             });
@@ -75,9 +77,14 @@ export class AuthService {
         };
     }
     async getTable(): Promise<User[]> {
-        return await this.userRepository.find({
-            select: ['firstname', 'lastname', 'username', 'email', 'mobile_number']
+        try {
+            return await this.userRepository.find({
+                select: ['firstname', 'lastname', 'username', 'email', 'mobile_number']
+            });
+        } catch (error) {
+            console.error('Error fetching user table:', error);
+            throw new Error('Failed to fetch user table. Please try again later.');
         }
-        );
     }
+    
 }
