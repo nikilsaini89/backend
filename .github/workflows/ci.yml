@@ -23,10 +23,10 @@ jobs:
           cache: 'npm'
  
       - name: Install Dependencies
-        run: npm install --force
+        run: npm install
  
       - name: Run tests in headless mode
-        run: npm run test -- --browsers ChromeHeadlessNoSandbox
+        run: npm run test 
  
       - name: Build Project (if applicable)
         run: npm run build
