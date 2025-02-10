@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
 import { sign } from "crypto";
 
-describe.only('AuthService', () => {
+describe('AuthService', () => {
   let authService: AuthService;
   let userRepository: Repository<User>;
   let jwtService: JwtService;
@@ -46,6 +46,7 @@ describe.only('AuthService', () => {
   });
 
   describe.only('signup', () => {
+
     const signupDto = {
       firstname: 'temp',
       lastname: 'temp',
@@ -58,7 +59,7 @@ describe.only('AuthService', () => {
 
     it('should successfully register a user', async () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
-      jest.spyOn(bcrypt, 'hashSync').mockReturnValue('hashedPassword');
+      jest.spyOn(bcrypt, 'hash').mockReturnValue('hashedPassword'); /// hashSync instead of hash
       jest.spyOn(userRepository, 'create').mockReturnValue({
         ...signupDto,
         password: 'hashedPassword',
@@ -72,7 +73,18 @@ describe.only('AuthService', () => {
 
       expect(result).toEqual({ message: 'User Registered Successfully' });
       expect(userRepository.create).toHaveBeenCalledTimes(1);
+      const user = expect(userRepository.create).toHaveBeenCalledWith({
+        ...signupDto,
+        password: 'hashedPassword',
+      } as any);
       expect(userRepository.save).toHaveBeenCalledTimes(1);
+      // expect(userRepository.save).toHaveBeenCalledWith({
+      //   ...signupDto,
+      //   password: 'hashedPassword',
+      // } as any);
+      // expect(userRepository.save).toHaveBeenCalledWith(user);
+      console.log('mai yaha se likh raha hu', user);
+    
     });
 
     it('should throw ConflictException if email exists', async () => {
@@ -138,12 +150,6 @@ describe.only('AuthService', () => {
     });
     
   });
-
-  describe('login', () => {
-
-    
-  });
-
 
   
 });
